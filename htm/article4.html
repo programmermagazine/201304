@@ -1,0 +1,426 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta http-equiv="Content-Style-Type" content="text/css" />
+  <meta name="generator" content="pandoc" />
+  <title></title>
+  <style type="text/css">code{white-space: pre;}</style>
+  <style type="text/css">
+table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
+  margin: 0; padding: 0; vertical-align: baseline; border: none; }
+table.sourceCode { width: 100%; line-height: 100%; }
+td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
+td.sourceCode { padding-left: 5px; }
+code > span.kw { color: #007020; font-weight: bold; }
+code > span.dt { color: #902000; }
+code > span.dv { color: #40a070; }
+code > span.bn { color: #40a070; }
+code > span.fl { color: #40a070; }
+code > span.ch { color: #4070a0; }
+code > span.st { color: #4070a0; }
+code > span.co { color: #60a0b0; font-style: italic; }
+code > span.ot { color: #007020; }
+code > span.al { color: #ff0000; font-weight: bold; }
+code > span.fu { color: #06287e; }
+code > span.er { color: #ff0000; font-weight: bold; }
+  </style>
+  <link rel="stylesheet" href="../css/pmag.css" type="text/css" />
+</head>
+<body>
+<div id="header_wrap">
+   <h1><a href="https://www.facebook.com/groups/programmerMagazine">程式人雜誌</a> <sub> --  2013 年 4 月號 (開放公益出版品)</sub></h1>
+</div>
+<div id="content">
+<h2 id="從-c-看作業系統-2-競爭情況鎖定與生產者消費者問題-作者陳鍾誠">從 C# 看作業系統-(2) 競爭情況、鎖定與生產者/消費者問題 (作者：陳鍾誠)</h2>
+<h2 id="競爭情況-race-condition">競爭情況 (Race Condition)</h2>
+<p>至此，我們已經用 C# 實作了作業系統中的 Thread 與 Deadlock 這兩種慨念，但事實上、這兩個概念之間是有關係的，要理解 Thread 與死結之間的關係，就必須從 Race Condition (競爭情況) 這個問題談起。</p>
+<p>在多 Thread (或多 CPU) 的情況之下，兩個 thread 可以共用某些變數，但是共用變數可能造成一個嚴重的問題，那就是當兩個 thread 同時修改一個變數時，這種修改會造成變數的值可能錯誤的情況，以下是一個範例。</p>
+<table>
+<thead>
+<tr class="header">
+<th align="left">Thread 1</th>
+<th align="left">Thread 2</th>
+<th align="left">Thread1+2 (第 1 種情況)</th>
+<th align="left">Thread1+2 (第 2 種情況)</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">counter = 0</td>
+<td align="left"></td>
+<td align="left"></td>
+<td align="left"></td>
+</tr>
+<tr class="even">
+<td align="left">...</td>
+<td align="left"></td>
+<td align="left"></td>
+<td align="left"></td>
+</tr>
+<tr class="odd">
+<td align="left">R1 = counter</td>
+<td align="left">R1 = counter</td>
+<td align="left">T1:R1 = counter</td>
+<td align="left">T1:R1 = counter</td>
+</tr>
+<tr class="even">
+<td align="left">R1 = R1 + 1</td>
+<td align="left">R1 = R1 - 1</td>
+<td align="left">T2:R1 = counter</td>
+<td align="left">T1:R1 = R1+1</td>
+</tr>
+<tr class="odd">
+<td align="left">counter = R1</td>
+<td align="left">counter = R1</td>
+<td align="left">T2:R1 = R1-1</td>
+<td align="left">T2:R1 = counter</td>
+</tr>
+<tr class="even">
+<td align="left"></td>
+<td align="left"></td>
+<td align="left">T2:counter=R1</td>
+<td align="left">T2:R1 = R1-1</td>
+</tr>
+<tr class="odd">
+<td align="left"></td>
+<td align="left"></td>
+<td align="left">T1:R1 = R1+1</td>
+<td align="left">T2:counter = R1</td>
+</tr>
+<tr class="even">
+<td align="left"></td>
+<td align="left"></td>
+<td align="left">T1:counter = R1</td>
+<td align="left">T1:counter = R1</td>
+</tr>
+<tr class="odd">
+<td align="left"></td>
+<td align="left"></td>
+<td align="left">...</td>
+<td align="left">...</td>
+</tr>
+<tr class="even">
+<td align="left"></td>
+<td align="left"></td>
+<td align="left">執行結果 : counter = 0</td>
+<td align="left">執行結果 : counter = -1</td>
+</tr>
+</tbody>
+</table>
+<p>這種情況並非只在多 CPU 的系統裡會發生，在單 CPU 的多線程系統裡也會發生，因為一個高階語言指令在翻譯成機器碼時，通常會變成很多個指令，這讓修改的動作無法在單一指令內完成，如果這些修改動作執行到一半的時候，線程被切換了，就會造成上述的競爭情況。</p>
+<table>
+<thead>
+<tr class="header">
+<th align="left">高階語言</th>
+<th align="left">組合語言</th>
+<th align="left">對應動作</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">counter ++</td>
+<td align="left">LD R1, counter</td>
+<td align="left">R1 = counter</td>
+</tr>
+<tr class="even">
+<td align="left"></td>
+<td align="left">ADD R1, R1, 1</td>
+<td align="left">R1 = R1 + 1</td>
+</tr>
+<tr class="odd">
+<td align="left"></td>
+<td align="left">ST R1, counter</td>
+<td align="left">counter = R1</td>
+</tr>
+</tbody>
+</table>
+<p>這種競爭情況對程式設計者而言是無法接受的，如果程式的執行結果無法確保，那所有的程式都將陷入一團混亂，連 counter++ 這樣的動作都有問題的話，那任何多線程的程式都將無法正確運作。</p>
+<p>為了避免這樣的問題產生，一個可能的解決方法是採用鎖定 (lock) 的方式，當我們執行共用變數的修改時，先進行鎖定，讓其他的線程無法同時修改該變數，等到修改完畢後解索後，其他的線程才能修改該變數，這樣就能避免掉競爭情況的問題了。</p>
+<p>但是、一但我們能夠進行鎖定的動作，那就可能會造成上述的死結情況，這也正是 Thread 與死結之間的關係，讓我們用一句話總結如下：</p>
+<pre><code>因為多線程的程式會有競爭情況，為了避免該情況而引入了鎖定機制，
+但是鎖定機制用得不好就會造成死結。</code></pre>
+<p>讓我們先用程式來驗證競爭情況的存在，以下是一個 C# 的競爭情況範例 (當然這種競爭情況是我們刻意造成的)。</p>
+<p>檔案：RaceConditon.cs</p>
+<pre class="sourceCode CS"><code class="sourceCode cs"><span class="kw">using</span> System;
+<span class="kw">using</span> System.<span class="fu">Threading</span>;
+<span class="kw">using</span> System.<span class="fu">Collections</span>.<span class="fu">Generic</span>;
+
+<span class="kw">class</span> RaceCondition
+{
+    <span class="kw">static</span> <span class="dt">int</span> counter = <span class="dv">0</span>, R1 = <span class="dv">0</span>;
+    <span class="kw">static</span> <span class="dt">void</span> <span class="fu">Main</span>(<span class="dt">string</span>[] args)
+    {
+        Thread thread1 = <span class="kw">new</span> <span class="fu">Thread</span>(inc);
+        Thread thread2 = <span class="kw">new</span> <span class="fu">Thread</span>(dec);
+        thread1.<span class="fu">Start</span>();
+        thread2.<span class="fu">Start</span>();
+        thread1.<span class="fu">Join</span>();
+        thread2.<span class="fu">Join</span>();
+    }
+
+    <span class="kw">static</span> Random random = <span class="kw">new</span> <span class="fu">Random</span>();
+
+    <span class="kw">static</span> <span class="dt">void</span> <span class="fu">waitAndSee</span>(String msg)
+    {
+        Thread.<span class="fu">Sleep</span>(random.<span class="fu">Next</span>(<span class="dv">0</span>, <span class="dv">10</span>));
+        Console.<span class="fu">WriteLine</span>(msg+<span class="st">&quot;     R1:&quot;</span>+R1+<span class="st">&quot; counter:&quot;</span>+counter);
+    }
+
+    <span class="kw">static</span> <span class="dt">void</span> <span class="fu">inc</span>()
+    {
+        R1 = counter;
+        <span class="fu">waitAndSee</span>(<span class="st">&quot;inc:R1 = counter&quot;</span>);
+        R1 = R1 + <span class="dv">1</span>;
+        <span class="fu">waitAndSee</span>(<span class="st">&quot;inc:R1 = R1 + 1 &quot;</span>);
+        counter = R1;
+        <span class="fu">waitAndSee</span>(<span class="st">&quot;inc:counter = R1&quot;</span>);
+    }
+
+    <span class="kw">static</span> <span class="dt">void</span> <span class="fu">dec</span>()
+    {
+        R1 = counter;
+        <span class="fu">waitAndSee</span>(<span class="st">&quot;dec:R1 = counter&quot;</span>);
+        R1 = R1 - <span class="dv">1</span>;
+        <span class="fu">waitAndSee</span>(<span class="st">&quot;dec:R1 = R1 - 1 &quot;</span>);
+        counter = R1;
+        <span class="fu">waitAndSee</span>(<span class="st">&quot;dec:counter = R1&quot;</span>);
+    }
+}</code></pre>
+<p>執行結果</p>
+<pre><code>D:\Dropbox\Public\cs\code&gt;RaceCondition
+inc:R1 = counter     R1:0 counter:0
+dec:R1 = counter     R1:0 counter:0
+inc:R1 = R1 + 1      R1:0 counter:0
+inc:counter = R1     R1:0 counter:0
+dec:R1 = R1 - 1      R1:0 counter:0
+dec:counter = R1     R1:0 counter:0
+
+D:\Dropbox\Public\cs\code&gt;RaceCondition
+inc:R1 = counter     R1:0 counter:0
+inc:R1 = R1 + 1      R1:0 counter:0
+dec:R1 = counter     R1:0 counter:0
+inc:counter = R1     R1:-1 counter:0
+dec:R1 = R1 - 1      R1:-1 counter:0
+dec:counter = R1     R1:-1 counter:-1</code></pre>
+<p>要解決以上的競爭情況，必須採用一些協調 (Cooperation) 方法，C# 當中所提供的主要協調方法是 lock 這個語句。簡單來說，C# 的 lock 的實作方式就是採用作業系統教科書中所說的 Monitor 之方法，只是在 lock 的開始加入 Monitor.Enter() 語句，然後在 lock 的結束加入 Monitor.Exit() 語句而已，其方法如下所示。</p>
+<table>
+<thead>
+<tr class="header">
+<th align="left">C# lock</th>
+<th align="left">Monitor 語句</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">lock (_locker) {</td>
+<td align="left">Monitor.Enter(_locker);</td>
+</tr>
+<tr class="even">
+<td align="left">...</td>
+<td align="left">...</td>
+</tr>
+<tr class="odd">
+<td align="left">critical();</td>
+<td align="left">critical();</td>
+</tr>
+<tr class="even">
+<td align="left">...</td>
+<td align="left">...</td>
+</tr>
+<tr class="odd">
+<td align="left">}</td>
+<td align="left">Monitor.Exit(_locker);</td>
+</tr>
+</tbody>
+</table>
+<p>使用 lock 的方式，我們可以很輕易的解決上述程式的競爭情況，以下是該程式加入 lock 機制後的程式碼與執行結果。</p>
+<p>檔案：RaceConditonLock.cs</p>
+<pre class="sourceCode CS"><code class="sourceCode cs"><span class="kw">using</span> System;
+<span class="kw">using</span> System.<span class="fu">Threading</span>;
+<span class="kw">using</span> System.<span class="fu">Collections</span>.<span class="fu">Generic</span>;
+
+<span class="kw">class</span> RaceConditionLock
+{
+    <span class="kw">static</span> <span class="dt">int</span> counter = <span class="dv">0</span>, R1 = <span class="dv">0</span>;
+    <span class="kw">static</span> String counterLocker = <span class="st">&quot;counterLocker&quot;</span>;
+    
+    <span class="kw">static</span> <span class="dt">void</span> <span class="fu">Main</span>(<span class="dt">string</span>[] args)
+    {
+        Thread thread1 = <span class="kw">new</span> <span class="fu">Thread</span>(inc);
+        Thread thread2 = <span class="kw">new</span> <span class="fu">Thread</span>(dec);
+        thread1.<span class="fu">Start</span>();
+        thread2.<span class="fu">Start</span>();
+        thread1.<span class="fu">Join</span>();
+        thread2.<span class="fu">Join</span>();
+    }
+
+    <span class="kw">static</span> Random random = <span class="kw">new</span> <span class="fu">Random</span>();
+
+    <span class="kw">static</span> <span class="dt">void</span> <span class="fu">waitAndSee</span>(String msg)
+    {
+        Thread.<span class="fu">Sleep</span>(random.<span class="fu">Next</span>(<span class="dv">0</span>, <span class="dv">10</span>));
+        Console.<span class="fu">WriteLine</span>(msg+<span class="st">&quot;     R1:&quot;</span>+R1+<span class="st">&quot; counter:&quot;</span>+counter);
+    }
+
+    <span class="kw">static</span> <span class="dt">void</span> <span class="fu">inc</span>()
+    {
+        <span class="kw">lock</span> (counterLocker) {
+            R1 = counter;
+            <span class="fu">waitAndSee</span>(<span class="st">&quot;inc:R1 = counter&quot;</span>);
+            R1 = R1 + <span class="dv">1</span>;
+            <span class="fu">waitAndSee</span>(<span class="st">&quot;inc:R1 = R1 + 1 &quot;</span>);
+            counter = R1;
+            <span class="fu">waitAndSee</span>(<span class="st">&quot;inc:counter = R1&quot;</span>);
+        }
+    }
+
+    <span class="kw">static</span> <span class="dt">void</span> <span class="fu">dec</span>()
+    {
+        <span class="kw">lock</span> (counterLocker) {
+            R1 = counter;
+            <span class="fu">waitAndSee</span>(<span class="st">&quot;dec:R1 = counter&quot;</span>);
+            R1 = R1 - <span class="dv">1</span>;
+            <span class="fu">waitAndSee</span>(<span class="st">&quot;dec:R1 = R1 - 1 &quot;</span>);
+            counter = R1;
+            <span class="fu">waitAndSee</span>(<span class="st">&quot;dec:counter = R1&quot;</span>);
+        }
+    }
+}</code></pre>
+<p>執行結果</p>
+<pre><code>D:\Dropbox\Public\cs\code&gt;csc RaceConditionLock.cs
+適用於 Microsoft (R) .NET Framework 4.5 的
+Microsoft (R) Visual C# 編譯器版本 4.0.30319.17929
+Copyright (C) Microsoft Corporation. 著作權所有，並保留一切權利。
+
+
+D:\Dropbox\Public\cs\code&gt;RaceConditionLock
+inc:R1 = counter     R1:0 counter:0
+inc:R1 = R1 + 1      R1:1 counter:0
+inc:counter = R1     R1:1 counter:1
+dec:R1 = counter     R1:1 counter:1
+dec:R1 = R1 - 1      R1:0 counter:1
+dec:counter = R1     R1:0 counter:0
+
+D:\Dropbox\Public\cs\code&gt;RaceConditionLock
+inc:R1 = counter     R1:0 counter:0
+inc:R1 = R1 + 1      R1:1 counter:0
+inc:counter = R1     R1:1 counter:1
+dec:R1 = counter     R1:1 counter:1
+dec:R1 = R1 - 1      R1:0 counter:1
+dec:counter = R1     R1:0 counter:0
+
+D:\Dropbox\Public\cs\code&gt;RaceConditionLock
+inc:R1 = counter     R1:0 counter:0
+inc:R1 = R1 + 1      R1:1 counter:0
+inc:counter = R1     R1:1 counter:1
+dec:R1 = counter     R1:1 counter:1
+dec:R1 = R1 - 1      R1:0 counter:1
+dec:counter = R1     R1:0 counter:0</code></pre>
+<h2 id="號誌-semaphore-與生產者消費者問題">號誌 (Semaphore) 與生產者/消費者問題</h2>
+<pre class="sourceCode CS"><code class="sourceCode cs"><span class="kw">using</span> System;
+<span class="kw">using</span> System.<span class="fu">Threading</span>;
+<span class="kw">using</span> System.<span class="fu">Collections</span>.<span class="fu">Generic</span>;
+
+<span class="kw">class</span> ProducerConsumer
+{
+    <span class="kw">static</span> <span class="kw">readonly</span> <span class="dt">int</span> BUFFER_SIZE = <span class="dv">3</span>;
+    <span class="kw">static</span> Queue&lt;<span class="dt">int</span>&gt; queue = <span class="kw">new</span> Queue&lt;<span class="dt">int</span>&gt;(BUFFER_SIZE);
+    <span class="kw">static</span> Semaphore filled = <span class="kw">new</span> <span class="fu">Semaphore</span>(<span class="dv">0</span>, BUFFER_SIZE);
+    <span class="kw">static</span> Semaphore unfilled = <span class="kw">new</span> <span class="fu">Semaphore</span>(BUFFER_SIZE, BUFFER_SIZE);
+    <span class="kw">static</span> Mutex mutex = <span class="kw">new</span> <span class="fu">Mutex</span>(<span class="kw">false</span>);
+
+    <span class="kw">static</span> <span class="dt">void</span> <span class="fu">Main</span>(<span class="dt">string</span>[] args)
+    {
+        Thread producer = <span class="kw">new</span> <span class="fu">Thread</span>(<span class="kw">new</span> <span class="fu">ThreadStart</span>(produce));
+        Thread consumer = <span class="kw">new</span> <span class="fu">Thread</span>(<span class="kw">new</span> <span class="fu">ThreadStart</span>(consume));
+        producer.<span class="fu">Start</span>();
+        consumer.<span class="fu">Start</span>();
+        producer.<span class="fu">Join</span>();
+        consumer.<span class="fu">Join</span>();
+    }
+
+    <span class="kw">static</span> Random random = <span class="kw">new</span> <span class="fu">Random</span>();
+
+    <span class="kw">private</span> <span class="kw">static</span> <span class="dt">void</span> <span class="fu">produce</span>()
+    {
+        <span class="kw">while</span> (<span class="kw">true</span>)
+        {
+            Thread.<span class="fu">Sleep</span>(random.<span class="fu">Next</span>(<span class="dv">0</span>, <span class="dv">500</span>));
+            <span class="dt">int</span> produceNumber = random.<span class="fu">Next</span>(<span class="dv">0</span>, <span class="dv">20</span>);
+            Console.<span class="fu">WriteLine</span>(<span class="st">&quot;Produce: {0}&quot;</span>, produceNumber);
+
+            unfilled.<span class="fu">WaitOne</span>();     <span class="co">// wait(unfilled)</span>
+            mutex.<span class="fu">WaitOne</span>();                <span class="co">// wait(mutex)</span>
+            
+            queue.<span class="fu">Enqueue</span>(produceNumber);
+
+            mutex.<span class="fu">ReleaseMutex</span>();           <span class="co">// signal(mutex)</span>
+            filled.<span class="fu">Release</span>();       <span class="co">// signal(filled)</span>
+
+            <span class="kw">if</span> (produceNumber == <span class="dv">0</span>)
+                <span class="kw">break</span>;
+        }
+    }
+
+    <span class="kw">private</span> <span class="kw">static</span> <span class="dt">void</span> <span class="fu">consume</span>()
+    {
+        <span class="kw">while</span> (<span class="kw">true</span>)
+        {
+            filled.<span class="fu">WaitOne</span>();       <span class="co">// wait(filled)</span>
+            mutex.<span class="fu">WaitOne</span>();                <span class="co">// wait(mutex)</span>
+            <span class="dt">int</span> number = queue.<span class="fu">Dequeue</span>();
+            Console.<span class="fu">WriteLine</span>(<span class="st">&quot;Consume: {0}&quot;</span>, number);
+
+            mutex.<span class="fu">ReleaseMutex</span>();           <span class="co">// signal(mutex)</span>
+            unfilled.<span class="fu">Release</span>(); <span class="co">// signal(unfilled)</span>
+            <span class="kw">if</span> (number == <span class="dv">0</span>)
+                <span class="kw">break</span>;
+            Thread.<span class="fu">Sleep</span>(random.<span class="fu">Next</span>(<span class="dv">0</span>, <span class="dv">1000</span>));
+        }
+    }
+}</code></pre>
+<p>執行結果</p>
+<pre><code>D:\Dropbox\Public\pmag\201304\code&gt;ProducerConsumer
+Produce: 7
+Consume: 7
+Produce: 4
+Produce: 12
+Consume: 4
+Produce: 16
+Produce: 1
+Consume: 12
+Produce: 8
+Consume: 16
+Produce: 15
+Produce: 7
+Consume: 1
+Produce: 18
+Consume: 8
+Produce: 0
+Consume: 15
+Consume: 7
+Consume: 18
+Consume: 0</code></pre>
+<p>另外、在作業系統中有個多行程的經典問題稱為 Dining Philospher (哲學家用餐) 問題，也可以採用 lock 的方法解決，由於這個問題實務上比較不那麼常用，本文中就不再詳細探討此一問題，有興趣的朋友可以看看網路上的解決方法，像是以下這篇 java2s 當中的程式就用 C# 實作解決了此一問題。</p>
+<ul>
+<li><a href="http://www.java2s.com/Tutorial/CSharp/0420__Thread/DiningPhilosopher.htm">http://www.java2s.com/Tutorial/CSharp/0420__Thread/DiningPhilosopher.htm</a></li>
+</ul>
+<p>在本章中，我們購過透過實作的方式，讓讀者感受作業系統當中的 Thread、Deadlock、Race Condition、與 Semaphore 等概念，希望這樣的說明方式對讀者會有所幫助。</p>
+<h2 id="參考文獻">參考文獻</h2>
+<ul>
+<li>Threading in C#, Joseph Albahari (超讚！)
+<ul>
+<li><a href="http://www.albahari.com/threading/">http://www.albahari.com/threading/</a></li>
+</ul></li>
+<li>Agile and Domain-Driven in C#:Multithreaded Producer/Consumer using Semaphore and Mutex in C# 2.0
+<ul>
+<li><a href="http://agilelover.blogspot.tw/2006/09/multithreaded-producerconsumer-using.html">http://agilelover.blogspot.tw/2006/09/multithreaded-producerconsumer-using.html</a></li>
+</ul></li>
+</ul>
+</div>
+<div id="footer">
+<a href="https://www.facebook.com/groups/programmerMagazine/">程式人雜誌</a>，採用 <a href="http://creativecommons.org/licenses/by-sa/3.0/tw/ ">創作共用：姓名標示、相同方式分享</a> 授權，歡迎加入 <a href="https://www.facebook.com/groups/programmerMagazine/">雜誌社團</a>
+</div>
+</body>
+</html>

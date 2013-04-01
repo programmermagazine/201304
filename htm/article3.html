@@ -1,0 +1,370 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta http-equiv="Content-Style-Type" content="text/css" />
+  <meta name="generator" content="pandoc" />
+  <title></title>
+  <style type="text/css">code{white-space: pre;}</style>
+  <style type="text/css">
+table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
+  margin: 0; padding: 0; vertical-align: baseline; border: none; }
+table.sourceCode { width: 100%; line-height: 100%; }
+td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
+td.sourceCode { padding-left: 5px; }
+code > span.kw { color: #007020; font-weight: bold; }
+code > span.dt { color: #902000; }
+code > span.dv { color: #40a070; }
+code > span.bn { color: #40a070; }
+code > span.fl { color: #40a070; }
+code > span.ch { color: #4070a0; }
+code > span.st { color: #4070a0; }
+code > span.co { color: #60a0b0; font-style: italic; }
+code > span.ot { color: #007020; }
+code > span.al { color: #ff0000; font-weight: bold; }
+code > span.fu { color: #06287e; }
+code > span.er { color: #ff0000; font-weight: bold; }
+  </style>
+  <link rel="stylesheet" href="../css/pmag.css" type="text/css" />
+</head>
+<body>
+<div id="header_wrap">
+   <h1><a href="https://www.facebook.com/groups/programmerMagazine">程式人雜誌</a> <sub> --  2013 年 4 月號 (開放公益出版品)</sub></h1>
+</div>
+<div id="content">
+<h2 id="r-統計軟體2-抽樣與敘述統計-作者陳鍾誠">R 統計軟體(2)-抽樣與敘述統計 (作者：陳鍾誠)</h2>
+<h3 id="隨機抽樣">隨機抽樣</h3>
+<p>統計的基礎是抽樣，所謂的抽樣就是從母體 (一大群樣本) 當中抽出一些樣本，而在抽樣的時候，我們通常會盡可能的確保樣本的隨機性，以避免抽到的樣本有所偏差。</p>
+<p>簡單來說，抽樣是從一群東西(母體) 當中隨機抽取出 x1, x2, ...., xn 等 n 個觀察值的過程，表示如下：</p>
+<pre><code>母體 =&gt; (獨立性) X1, X2, .... , Xn 等 n 個隨機變數相互獨立 =&gt; 取出 x1, x2, ...., xn 等 n 個觀察值。</code></pre>
+<p>在電腦上，我們可以很容易的模擬隨機抽樣，以下是一個使用 R 軟體模擬隨機抽樣的範例，其中指令 sample(1:100, 10) 代表從 1 到 100 的整數當中取出 10 個樣本出來。</p>
+<pre class="sourceCode R"><code class="sourceCode r">&gt;<span class="st"> </span>x =<span class="st"> </span><span class="kw">sample</span>(<span class="dv">1</span>:<span class="dv">100</span>, <span class="dv">10</span>)
+&gt;<span class="st"> </span>x
+ [<span class="dv">1</span>] <span class="dv">12</span> <span class="dv">17</span> <span class="dv">50</span> <span class="dv">33</span> <span class="dv">98</span> <span class="dv">77</span> <span class="dv">39</span> <span class="dv">79</span>  <span class="dv">7</span> <span class="dv">26</span></code></pre>
+<p>sample 函數的原型是 <code>sample(x, size, replace = FALSE, prob = NULL)</code>，如果 replace 設定為 FALSE，代表已經取過就會被去除，不能重複出現；反之則可以重複出現。</p>
+<p>在統計學中，有一些常用的機率模型，都有對應的 R 抽樣函數，以下是一些最常用的機率模型之整理。</p>
+<table>
+<thead>
+<tr class="header">
+<th align="left">機率模型</th>
+<th align="left">密度函數</th>
+<th align="left">R 函數名稱</th>
+<th align="left">說明</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">二項分布</td>
+<td align="left"><img style="vertical-align:middle" src="http://chart.apis.google.com/chart?cht=tx&amp;chl=%7Bn%20%5Cchoose%20x%7D%20p%5Ex%20%281-p%29%5E%7Bn-x%7D" alt="{n \choose x} p^x (1-p)^{n-x}" title="{n \choose x} p^x (1-p)^{n-x}" /></td>
+<td align="left">binom(n:size, p:prob)</td>
+<td align="left">n:樣本數, p:正面機率, <br/> n 次試驗中有 x 個成功的機率</td>
+</tr>
+<tr class="even">
+<td align="left">布瓦松分布</td>
+<td align="left"><img style="vertical-align:middle" src="http://chart.apis.google.com/chart?cht=tx&amp;chl=%5Cfrac%7Be%5E%7B-%5Clambda%20s%7D%20%7B%5Clambda%20s%7D%5Ex%7D%7Bx%21%7D" alt="\frac{e^{-\lambda s} {\lambda s}^x}{x!}" title="\frac{e^{-\lambda s} {\lambda s}^x}{x!}" /></td>
+<td align="left">pois(lambda)</td>
+<td align="left">k:期望值, <img style="vertical-align:middle" src="http://chart.apis.google.com/chart?cht=tx&amp;chl=%5Clambda%20%3D%20%5Cfrac%7Bk%7D%7Bs%7D" alt="\lambda = \frac{k}{s}" title="\lambda = \frac{k}{s}" />, <br/> 在 s 時間內，事件出現平均 k 次</td>
+</tr>
+<tr class="odd">
+<td align="left">均勻分布 (Uniform)</td>
+<td align="left"><img style="vertical-align:middle" src="http://chart.apis.google.com/chart?cht=tx&amp;chl=%5Cfrac%7B1%7D%7Bb-a%7D" alt="\frac{1}{b-a}" title="\frac{1}{b-a}" /></td>
+<td align="left">unif(a:min, b:max)</td>
+<td align="left">a:範圍下限, b: 上限 <br/> 出現機會均等</td>
+</tr>
+<tr class="even">
+<td align="left">常態分布(Normal)</td>
+<td align="left"><img style="vertical-align:middle" src="http://chart.apis.google.com/chart?cht=tx&amp;chl=%5Cfrac%7B1%7D%7B%5Csqrt%7B2%5Cpi%7D%20%5Csigma%7D%20e%5E%7B-%20%5Cfrac%7B1%7D%7B2%7D%20%5B%28x-%5Cmu%29%2F%5Csigma%5D%5E2%7D" alt="\frac{1}{\sqrt{2\pi} \sigma} e^{- \frac{1}{2} [(x-\mu)/\sigma]^2}" title="\frac{1}{\sqrt{2\pi} \sigma} e^{- \frac{1}{2} [(x-\mu)/\sigma]^2}" /></td>
+<td align="left">norm(mean, sd)</td>
+<td align="left">中央極限定理：x1+x2+...+xk; 當 k 越大就越接近常態分布</td>
+</tr>
+<tr class="odd">
+<td align="left">指數分布 (Exponential)</td>
+<td align="left"><img style="vertical-align:middle" src="http://chart.apis.google.com/chart?cht=tx&amp;chl=%5Cfrac%7B1%7D%7Bb%7D%20e%5E%7B-x%2Fb%7D" alt="\frac{1}{b} e^{-x/b}" title="\frac{1}{b} e^{-x/b}" /></td>
+<td align="left">exp(rate)</td>
+<td align="left">伽瑪分布(<img style="vertical-align:middle" src="http://chart.apis.google.com/chart?cht=tx&amp;chl=a%3D1%2C%20b%3D%5Cfrac%7B1%7D%7B%5Clambda%7D" alt="a=1, b=\frac{1}{\lambda}" title="a=1, b=\frac{1}{\lambda}" />) <br/> 布瓦松過程中，第一次事件出現的時間 W</td>
+</tr>
+</tbody>
+</table>
+<p>對於每個機率模型，您只要在該函數前若加入 r 這個字，就可以用來產生隨機樣本，以下是一些隨機樣本的產生範例。</p>
+<pre class="sourceCode R"><code class="sourceCode r">&gt;<span class="st"> </span><span class="kw">rbinom</span>(<span class="dv">20</span>, <span class="dv">5</span>, <span class="fl">0.5</span>)
+ [<span class="dv">1</span>] <span class="dv">4</span> <span class="dv">3</span> <span class="dv">3</span> <span class="dv">4</span> <span class="dv">2</span> <span class="dv">4</span> <span class="dv">3</span> <span class="dv">1</span> <span class="dv">2</span> <span class="dv">3</span> <span class="dv">4</span> <span class="dv">3</span> <span class="dv">2</span> <span class="dv">2</span> <span class="dv">2</span> <span class="dv">4</span> <span class="dv">2</span> <span class="dv">3</span> <span class="dv">1</span> <span class="dv">1</span>
+&gt;<span class="st"> </span><span class="kw">rpois</span>(<span class="dv">20</span>, <span class="fl">3.5</span>)
+ [<span class="dv">1</span>] <span class="dv">2</span> <span class="dv">1</span> <span class="dv">4</span> <span class="dv">2</span> <span class="dv">1</span> <span class="dv">6</span> <span class="dv">3</span> <span class="dv">6</span> <span class="dv">1</span> <span class="dv">3</span> <span class="dv">3</span> <span class="dv">6</span> <span class="dv">6</span> <span class="dv">0</span> <span class="dv">4</span> <span class="dv">2</span> <span class="dv">6</span> <span class="dv">4</span> <span class="dv">6</span> <span class="dv">2</span>
+&gt;<span class="st"> </span><span class="kw">runif</span>(<span class="dv">20</span>, <span class="dt">min =</span> <span class="dv">3</span>, <span class="dt">max =</span> <span class="dv">8</span>)
+ [<span class="dv">1</span>] <span class="fl">3.933526</span> <span class="fl">3.201883</span> <span class="fl">7.592147</span> <span class="fl">5.207603</span> <span class="fl">4.897806</span> <span class="fl">3.848298</span> <span class="fl">4.521461</span> <span class="fl">4.437873</span>
+ [<span class="dv">9</span>] <span class="fl">3.655640</span> <span class="fl">5.633540</span> <span class="fl">6.557995</span> <span class="fl">5.430671</span> <span class="fl">6.502675</span> <span class="fl">5.637283</span> <span class="fl">7.713699</span> <span class="fl">5.841052</span>
+[<span class="dv">17</span>] <span class="fl">6.859493</span> <span class="fl">5.987991</span> <span class="fl">3.752924</span> <span class="fl">7.480678</span>
+&gt;<span class="st"> </span><span class="kw">rnorm</span>(<span class="dv">20</span>, <span class="dt">mean =</span> <span class="fl">5.0</span>, <span class="dt">sd =</span> <span class="fl">2.0</span>)
+ [<span class="dv">1</span>] <span class="fl">6.150209</span> <span class="fl">4.743013</span> <span class="fl">3.328734</span> <span class="fl">5.096294</span> <span class="fl">4.922795</span> <span class="fl">6.272768</span> <span class="fl">4.862825</span> <span class="fl">8.036376</span>
+ [<span class="dv">9</span>] <span class="fl">4.198432</span> <span class="fl">5.467984</span> <span class="fl">2.046450</span> <span class="fl">6.452511</span> <span class="fl">2.088256</span> <span class="fl">5.349187</span> <span class="fl">3.074408</span> <span class="fl">3.628072</span>
+[<span class="dv">17</span>] <span class="fl">3.421388</span> <span class="fl">7.242598</span> <span class="fl">3.125895</span> <span class="fl">9.865341</span>
+&gt;<span class="st"> </span><span class="kw">rexp</span>(<span class="dv">20</span>, <span class="dt">rate=</span><span class="fl">2.0</span>)
+ [<span class="dv">1</span>] <span class="fl">0.17667426</span> <span class="fl">0.49729383</span> <span class="fl">0.12786107</span> <span class="fl">0.13983412</span> <span class="fl">0.44683515</span> <span class="fl">1.30482842</span>
+ [<span class="dv">7</span>] <span class="fl">0.28512544</span> <span class="fl">1.61472266</span> <span class="fl">0.23220649</span> <span class="fl">0.39089780</span> <span class="fl">0.05947224</span> <span class="fl">1.42892610</span>
+[<span class="dv">13</span>] <span class="fl">0.02555552</span> <span class="fl">0.69409186</span> <span class="fl">0.68228242</span> <span class="fl">0.22542362</span> <span class="fl">0.33590791</span> <span class="fl">0.14684937</span>
+[<span class="dv">19</span>] <span class="fl">0.34995146</span> <span class="fl">0.80595369</span></code></pre>
+<p>為了讓讀者能確認這些指令所產生的圖形確實符合分布，讓我們用這些隨機抽樣函數各產生 100,000 個樣本， 然後用 hist() 這個函數繪製統計圖，就能看出這些抽樣函數的效果了，以下是我們的抽樣指令與結果圖形。</p>
+<pre class="sourceCode R"><code class="sourceCode r">&gt;<span class="st"> </span>x =<span class="st"> </span><span class="kw">rbinom</span>(<span class="dv">100000</span>, <span class="dv">5</span>, <span class="fl">0.5</span>)
+&gt;<span class="st"> </span><span class="kw">hist</span>(x)</code></pre>
+<div class="figure">
+<img src="../img/rbinomHist.jpg" alt="rbinom(100000, 5, 0.5) 的統計圖" /><p class="caption">rbinom(100000, 5, 0.5) 的統計圖</p>
+</div>
+<pre class="sourceCode R"><code class="sourceCode r">&gt;<span class="st"> </span>y =<span class="st"> </span><span class="kw">rpois</span>(<span class="dv">100000</span>, <span class="fl">3.5</span>)
+&gt;<span class="st"> </span><span class="kw">hist</span>(y)</code></pre>
+<div class="figure">
+<img src="../img/rpoisHist.jpg" alt="rpois(100000, 3.5) 的統計圖" /><p class="caption">rpois(100000, 3.5) 的統計圖</p>
+</div>
+<pre class="sourceCode R"><code class="sourceCode r">&gt;<span class="st"> </span>z =<span class="st"> </span><span class="kw">runif</span>(<span class="dv">100000</span>, <span class="dt">min=</span><span class="dv">3</span>, <span class="dt">max=</span><span class="dv">8</span>)
+&gt;<span class="st"> </span><span class="kw">hist</span>(z)</code></pre>
+<div class="figure">
+<img src="../img/runifHist.jpg" alt="runif(100000, min=3, max=8) 的統計圖" /><p class="caption">runif(100000, min=3, max=8) 的統計圖</p>
+</div>
+<pre class="sourceCode R"><code class="sourceCode r">&gt;<span class="st"> </span>w =<span class="st"> </span><span class="kw">rnorm</span>(<span class="dv">100000</span>, <span class="dt">mean=</span><span class="fl">5.0</span>, <span class="dt">sd=</span><span class="fl">2.0</span>)
+&gt;<span class="st"> </span><span class="kw">hist</span>(w)</code></pre>
+<div class="figure">
+<img src="../img/rnormHist.jpg" alt="rnorm(100000, mean=5.0, sd=2.0) 的統計圖" /><p class="caption">rnorm(100000, mean=5.0, sd=2.0) 的統計圖</p>
+</div>
+<pre class="sourceCode R"><code class="sourceCode r">&gt;<span class="st"> </span>v =<span class="st"> </span><span class="kw">rexp</span>(<span class="dv">100000</span>, <span class="dt">rate=</span><span class="fl">2.0</span>)
+&gt;<span class="st"> </span><span class="kw">hist</span>(v)</code></pre>
+<div class="figure">
+<img src="../img/rexpHist.jpg" alt="rexp(100000, rate=2.0) 的統計圖" /><p class="caption">rexp(100000, rate=2.0) 的統計圖</p>
+</div>
+<h3 id="敘述統計單組樣本的統計">敘述統計：單組樣本的統計</h3>
+<p>敘述統計乃是隨機抽樣的樣本集合，進行某些計算與繪圖，以便忠實的呈現出樣本的某些特性。這些計算出的數值，以及呈現出來的圖形，可以反映出樣本的某些統計特性，讓統計者能透過數值或圖形，大致了解樣本的統計特徵。</p>
+<table>
+<thead>
+<tr class="header">
+<th align="left">中文名稱</th>
+<th align="left">英文名稱</th>
+<th align="left">數學公式 / 說明</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">樣本平均數</td>
+<td align="left">Mean</td>
+<td align="left"><img style="vertical-align:middle" src="http://chart.apis.google.com/chart?cht=tx&amp;chl=%5Cbar%7BX%7D%20%3D%20%5Cfrac%7B%5Csum_%7Bi%3D1%7D%5En%20X_i%7D%7Bn%7D" alt="\bar{X} = \frac{\sum_{i=1}^n X_i}{n}" title="\bar{X} = \frac{\sum_{i=1}^n X_i}{n}" /></td>
+</tr>
+<tr class="even">
+<td align="left">樣本中位數</td>
+<td align="left">Median</td>
+<td align="left">樣本排序後最中間位置的數值</td>
+</tr>
+<tr class="odd">
+<td align="left">樣本變異數</td>
+<td align="left">Sample Variance</td>
+<td align="left"><img style="vertical-align:middle" src="http://chart.apis.google.com/chart?cht=tx&amp;chl=S%5E2%20%3D%20%5Csum_%7Bi%3D1%7D%5En%20%5Cfrac%7B%28X_i%20-%20%5Cbar%7BX%7D%29%5E2%7D%7Bn-1%7D%20%3D%20%5Cfrac%7Bn%20%5Csum_%7Bi%3D1%7D%5En%20X_i%5E2%20-%20%28%5Csum_%7Bi%3D1%7D%5En%20Xi%29%5E2%7D%7Bn%20%28n-1%29%7D" alt="S^2 = \sum_{i=1}^n \frac{(X_i - \bar{X})^2}{n-1} = \frac{n \sum_{i=1}^n X_i^2 - (\sum_{i=1}^n Xi)^2}{n (n-1)}" title="S^2 = \sum_{i=1}^n \frac{(X_i - \bar{X})^2}{n-1} = \frac{n \sum_{i=1}^n X_i^2 - (\sum_{i=1}^n Xi)^2}{n (n-1)}" /></td>
+</tr>
+<tr class="even">
+<td align="left">樣本標準差</td>
+<td align="left">Sample Standard Deviation</td>
+<td align="left">樣本變異數中的 S 稱為樣本標準差，也就是 <img style="vertical-align:middle" src="http://chart.apis.google.com/chart?cht=tx&amp;chl=%5Csqrt%7BS%5E2%7D" alt="\sqrt{S^2}" title="\sqrt{S^2}" /></td>
+</tr>
+<tr class="odd">
+<td align="left">樣本全距</td>
+<td align="left">Range</td>
+<td align="left">樣本中最大的觀察值減去最小的觀察值 <img style="vertical-align:middle" src="http://chart.apis.google.com/chart?cht=tx&amp;chl=%5Comega%20%3D%20X_H-X_L" alt="\omega = X_H-X_L" title="\omega = X_H-X_L" /></td>
+</tr>
+<tr class="even">
+<td align="left">離群值</td>
+<td align="left">Outlier 或 Wild</td>
+<td align="left">離其他樣本很遠，特別大或特別小的樣本值</td>
+</tr>
+<tr class="odd">
+<td align="left">樣本四分數間距</td>
+<td align="left">InterQuartile Range, IQR</td>
+<td align="left">第 3 四分位數減掉第 1 四分位數 <img style="vertical-align:middle" src="http://chart.apis.google.com/chart?cht=tx&amp;chl=IQR%20%3D%20q_3%20-%20q_1" alt="IQR = q_3 - q_1" title="IQR = q_3 - q_1" /></td>
+</tr>
+</tbody>
+</table>
+<p>注意：變異數的定義為 <img style="vertical-align:middle" src="http://chart.apis.google.com/chart?cht=tx&amp;chl=%5Cdelta%5E2%20%3D%20E%5B%28X-%5Cmu%29%5E2%5D" alt="\delta^2 = E[(X-\mu)^2]" title="\delta^2 = E[(X-\mu)^2]" />，上述的樣本變異數必須除以 n-1 才是變異數的不偏估計量，而不是除以 n。</p>
+<p>R 操作範例：敘述統計</p>
+<pre class="sourceCode R"><code class="sourceCode r">&gt;<span class="st"> </span>x =<span class="st"> </span><span class="kw">sample</span>(<span class="dv">1</span>:<span class="dv">100</span>, <span class="dv">10</span>)
+&gt;<span class="st"> </span>x
+ [<span class="dv">1</span>] <span class="dv">12</span> <span class="dv">17</span> <span class="dv">50</span> <span class="dv">33</span> <span class="dv">98</span> <span class="dv">77</span> <span class="dv">39</span> <span class="dv">79</span>  <span class="dv">7</span> <span class="dv">26</span>
+&gt;<span class="st"> </span><span class="kw">mean</span>(x)
+[<span class="dv">1</span>] <span class="fl">43.8</span>
+&gt;<span class="st"> </span><span class="kw">median</span>(x)
+[<span class="dv">1</span>] <span class="dv">36</span>
+&gt;<span class="st"> </span><span class="kw">var</span>(x)
+[<span class="dv">1</span>] <span class="fl">984.1778</span>
+&gt;<span class="st"> </span><span class="kw">sd</span>(x)
+[<span class="dv">1</span>] <span class="fl">31.37161</span>
+&gt;<span class="st"> </span><span class="kw">range</span>(x)
+[<span class="dv">1</span>]  <span class="dv">7</span> <span class="dv">98</span>
+&gt;<span class="st"> </span><span class="kw">max</span>(x)
+[<span class="dv">1</span>] <span class="dv">98</span>
+&gt;<span class="st"> </span><span class="kw">min</span>(x)
+[<span class="dv">1</span>] <span class="dv">7</span>
+&gt;<span class="st"> </span><span class="kw">max</span>(x)-<span class="kw">min</span>(x)
+[<span class="dv">1</span>] <span class="dv">91</span>
+&gt;<span class="st"> </span>q1 =<span class="st"> </span><span class="kw">quantile</span>(x, <span class="fl">0.25</span>)
+&gt;<span class="st"> </span>q1
+  <span class="dv">25</span>% 
+<span class="fl">19.25</span> 
+&gt;<span class="st"> </span>q3 =<span class="st"> </span><span class="kw">quantile</span>(x, <span class="fl">0.75</span>)
+&gt;<span class="st"> </span>q3
+  <span class="dv">75</span>% 
+<span class="fl">70.25</span> 
+&gt;<span class="st"> </span>q3-q1
+<span class="dv">75</span>% 
+ <span class="dv">51</span> 
+&gt;<span class="st"> </span><span class="kw">iqr</span>(x)
+錯誤:<span class="st"> </span>沒有這個函數 <span class="st">&quot;iqr&quot;</span>
+&gt;<span class="st"> </span><span class="kw">IQR</span>(x)
+[<span class="dv">1</span>] <span class="dv">51</span>
+&gt;<span class="st"> </span><span class="kw">fivenum</span>(x)
+[<span class="dv">1</span>]  <span class="dv">7</span> <span class="dv">17</span> <span class="dv">36</span> <span class="dv">77</span> <span class="dv">98</span>
+&gt;<span class="st"> </span><span class="kw">summary</span>(x)
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+   <span class="fl">7.00</span>   <span class="fl">19.25</span>   <span class="fl">36.00</span>   <span class="fl">43.80</span>   <span class="fl">70.25</span>   <span class="fl">98.00</span> </code></pre>
+<h3 id="敘述統計繪製統計圖">敘述統計：繪製統計圖</h3>
+<table>
+<thead>
+<tr class="header">
+<th align="left">中文名稱</th>
+<th align="left">英文名稱</th>
+<th align="left">說明</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">直方圖</td>
+<td align="left">Histogram</td>
+<td align="left">根據每個區間的樣本出現次數繪製的長條圖。</td>
+</tr>
+<tr class="even">
+<td align="left">肩型圖 (累加分配圖)</td>
+<td align="left">Relative Cumulative Frequency Ogive</td>
+<td align="left">將累加次數繪製出來的圖形。</td>
+</tr>
+<tr class="odd">
+<td align="left">莖葉圖</td>
+<td align="left">Stem-and-Leaf Diagram</td>
+<td align="left">用主幹數字與分支數字表示分布情況的圖形。</td>
+</tr>
+<tr class="even">
+<td align="left">盒型圖</td>
+<td align="left">Boxplots</td>
+<td align="left">由平均值、內籬笆與外籬笆所形成的盒型圖，可看出中心點與離散程度。</td>
+</tr>
+</tbody>
+</table>
+<p>說明：盒型圖是由四分位數 q1, q3, 以及內籬笆 f1, f3 (inner fences), 連接值 a1, a3 與外籬笆 F1, F3 (outer fances) 所組成的圖形</p>
+<ul>
+<li>內籬笆：f1 = q1 - 1.5 iqr; f3 = q3 + 1.5 iqr;</li>
+<li>外籬笆：F1 = q1 - 3.0 iqr; F3 = q3 + 3.0 iqr;</li>
+<li>連接值：a1 是大於且最接近 f1 的數據點; a3 小於且最接近 f3 的數據點。</li>
+</ul>
+<p>R 操作範例 : 統計圖</p>
+<pre class="sourceCode R"><code class="sourceCode r">&gt;<span class="st"> </span>x =<span class="st"> </span><span class="kw">rnorm</span>(<span class="dv">100</span>)
+&gt;<span class="st"> </span>x
+  [<span class="dv">1</span>]  <span class="fl">0.389381081</span> -<span class="fl">0.274522826</span>  <span class="fl">1.492670583</span> -<span class="fl">1.563228609</span>  <span class="fl">0.766405108</span>
+  [<span class="dv">6</span>]  <span class="fl">0.736573742</span>  <span class="fl">0.297407135</span> -<span class="fl">1.324130406</span> -<span class="fl">1.376598231</span>  <span class="fl">1.661727175</span>
+ [<span class="dv">11</span>] -<span class="fl">1.356590351</span>  <span class="fl">1.309122339</span> -<span class="fl">1.193821085</span>  <span class="fl">0.365801091</span> -<span class="fl">0.952034088</span>
+ [<span class="dv">16</span>] -<span class="fl">0.277610568</span> -<span class="fl">0.599980091</span> -<span class="fl">0.124105876</span> -<span class="fl">1.107713162</span>  <span class="fl">0.560637570</span>
+ [<span class="dv">21</span>]  <span class="fl">0.714449138</span>  <span class="fl">0.111969057</span>  <span class="fl">0.505171739</span> -<span class="fl">2.418297599</span>  <span class="fl">0.318797182</span>
+ [<span class="dv">26</span>]  <span class="fl">2.716646516</span>  <span class="fl">0.345289422</span>  <span class="fl">0.019434615</span>  <span class="fl">1.087758951</span>  <span class="fl">0.033917165</span>
+ [<span class="dv">31</span>] -<span class="fl">0.356786424</span> -<span class="fl">1.284809066</span>  <span class="fl">1.580411327</span>  <span class="fl">0.552931291</span> -<span class="fl">0.615928762</span>
+ [<span class="dv">36</span>] -<span class="fl">0.087069820</span> -<span class="fl">0.814632197</span> -<span class="fl">0.570882510</span> -<span class="fl">0.107731447</span> -<span class="fl">1.453838416</span>
+ [<span class="dv">41</span>] -<span class="fl">0.257115209</span>  <span class="fl">1.166866120</span>  <span class="fl">1.072692716</span> -<span class="fl">0.022594852</span>  <span class="fl">0.441221144</span>
+ [<span class="dv">46</span>]  <span class="fl">1.053900960</span> -<span class="fl">1.025193547</span> -<span class="fl">1.119200587</span>  <span class="fl">0.264668203</span>  <span class="fl">1.409504515</span>
+ [<span class="dv">51</span>]  <span class="fl">0.241644132</span> -<span class="fl">0.955407800</span>  <span class="fl">0.446297381</span>  <span class="fl">0.231887649</span>  <span class="fl">0.769308731</span>
+ [<span class="dv">56</span>]  <span class="fl">0.269624579</span>  <span class="fl">0.496109294</span>  <span class="fl">0.822638573</span> -<span class="fl">0.904380789</span> -<span class="fl">0.429527404</span>
+ [<span class="dv">61</span>] -<span class="fl">2.050582772</span> -<span class="fl">0.586973281</span> -<span class="fl">1.192753403</span>  <span class="fl">1.158321933</span> -<span class="fl">0.151319360</span>
+ [<span class="dv">66</span>]  <span class="fl">0.558858868</span> -<span class="fl">0.656174351</span> -<span class="fl">2.858964403</span>  <span class="fl">0.366785049</span>  <span class="fl">0.896958092</span>
+ [<span class="dv">71</span>]  <span class="fl">0.369315063</span> -<span class="fl">0.953560954</span> -<span class="fl">0.762608370</span> -<span class="fl">1.017449547</span> -<span class="fl">0.127738562</span>
+ [<span class="dv">76</span>] -<span class="fl">1.922030980</span> -<span class="fl">0.839897930</span>  <span class="fl">1.332972530</span> -<span class="fl">0.001151104</span>  <span class="fl">0.104336360</span>
+ [<span class="dv">81</span>] -<span class="fl">0.208907813</span>  <span class="fl">1.401335798</span>  <span class="fl">0.019330593</span> -<span class="fl">0.687559289</span>  <span class="fl">0.445371885</span>
+ [<span class="dv">86</span>]  <span class="fl">0.504532689</span>  <span class="fl">2.168626000</span> -<span class="fl">1.742886230</span>  <span class="fl">0.831058071</span>  <span class="fl">2.011604088</span>
+ [<span class="dv">91</span>]  <span class="fl">1.676059594</span>  <span class="fl">1.132849957</span> -<span class="fl">1.047073217</span> -<span class="fl">0.912548540</span> -<span class="fl">2.235854777</span>
+ [<span class="dv">96</span>] -<span class="fl">1.194104128</span>  <span class="fl">0.121106118</span> -<span class="fl">1.178415224</span>  <span class="fl">0.214196778</span>  <span class="fl">0.280714044</span>
+&gt;<span class="st"> </span><span class="kw">stem</span>(x)
+
+  The decimal point is at the |
+
+<span class="st">  </span>-<span class="dv">2</span> |<span class="st"> </span><span class="dv">9421</span>
+  -<span class="dv">1</span> |<span class="st"> </span><span class="dv">97654433222211000000</span>
+  -<span class="dv">0</span> |<span class="st"> </span><span class="dv">998887766664433322111100</span>
+   <span class="dv">0</span> |<span class="st"> </span><span class="dv">00011122233333344444445556667788889</span>
+   <span class="dv">1</span> |<span class="st"> </span><span class="dv">11112233445677</span>
+   <span class="dv">2</span> |<span class="st"> </span><span class="dv">027</span>
+
+&gt;<span class="st"> </span><span class="kw">hist</span>(x, <span class="dt">main=</span><span class="st">&quot;Frequency Histogram of x&quot;</span>)
+
+&gt;<span class="st"> </span><span class="kw">hist</span>(x, <span class="dt">main=</span><span class="st">&quot;Probability Histogram of x&quot;</span>, <span class="dt">freq=</span>F)
+
+&gt;<span class="st"> </span>Fx =<span class="st"> </span><span class="kw">ecdf</span>(x)
+
+&gt;<span class="st"> </span><span class="kw">plot</span>(x)
+
+&gt;<span class="st"> </span><span class="kw">plot</span>(Fx)
+
+&gt;<span class="st"> </span><span class="kw">boxplot</span>(x)</code></pre>
+<div class="figure">
+<img src="../img/DescriptiveGraph.jpg" alt="統計圖" /><p class="caption">統計圖</p>
+</div>
+<div class="figure">
+<img src="../img/BoxPlot.jpg" alt="盒狀圖" /><p class="caption">盒狀圖</p>
+</div>
+<p>以上都是對於單組樣本的統計數字與圖形，以下將討論兩組樣本的統計數字</p>
+<h3 id="敘述統計共變異數兩組樣本的相關度統計">敘述統計：共變異數、兩組樣本的相關度統計</h3>
+<p>兩組樣本的統計數字，最重要的就是共變異數 (covariance) 相關係數 (correlation) 與了。</p>
+<p>共變異數是兩組樣本 X, Y 的樣本與期望值之間差的乘積之期望值，而相關係數則共變異數經過 正規化後的結果，用來表示兩組樣本相關程度，其數值介於 -1.0 到 1.0 之間。</p>
+<table>
+<thead>
+<tr class="header">
+<th align="left">中文名稱</th>
+<th align="left">英文名稱</th>
+<th align="left">數學公式 / 說明</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">共變異數</td>
+<td align="left">covariance</td>
+<td align="left"><img style="vertical-align:middle" src="http://chart.apis.google.com/chart?cht=tx&amp;chl=%5Cgamma_%7BXY%7D%20%3DE%5B%20%28X-E%5BX%5D%29%5C%2C%28Y-E%5BY%5D%29%5D" alt="\gamma_{XY} =E[ (X-E[X])\,(Y-E[Y])]" title="\gamma_{XY} =E[ (X-E[X])\,(Y-E[Y])]" /></td>
+</tr>
+<tr class="even">
+<td align="left">相關係數</td>
+<td align="left">correlation</td>
+<td align="left"><img style="vertical-align:middle" src="http://chart.apis.google.com/chart?cht=tx&amp;chl=%5Cphi_%7BXY%7D%20%20%3DE%5B%20%28X-E%5BX%5D%29%28Y-E%5BY%5D%29%5D%2F%28%5Csigma_X%20%5Csigma_Y%29" alt="\phi_{XY}  =E[ (X-E[X])(Y-E[Y])]/(\sigma_X \sigma_Y)" title="\phi_{XY}  =E[ (X-E[X])(Y-E[Y])]/(\sigma_X \sigma_Y)" /></td>
+</tr>
+</tbody>
+</table>
+<p>讓我們看看 R 軟體中的共變異數函數 cov() 與相關係數 cor() 的操作，如下所示：</p>
+<pre class="sourceCode R"><code class="sourceCode r"> <span class="kw">runif</span>(<span class="dv">10</span>, <span class="dv">1</span>, <span class="dv">5</span>)
+&gt;<span class="st"> </span>x
+ [<span class="dv">1</span>] <span class="fl">1.375135</span> <span class="fl">1.863417</span> <span class="fl">2.403693</span> <span class="fl">2.639902</span> <span class="fl">1.694610</span> <span class="fl">4.419406</span> <span class="fl">4.032262</span> <span class="fl">2.147783</span>
+ [<span class="dv">9</span>] <span class="fl">1.501733</span> <span class="fl">1.497732</span>
+&gt;<span class="st"> </span><span class="kw">cov</span>(x, x)
+[<span class="dv">1</span>] <span class="fl">1.144697</span>
+&gt;<span class="st"> </span><span class="kw">cov</span>(x, x<span class="dv">+1</span>)
+[<span class="dv">1</span>] <span class="fl">1.144697</span>
+&gt;<span class="st"> </span><span class="kw">cor</span>(x, x)
+[<span class="dv">1</span>] <span class="dv">1</span>
+&gt;<span class="st"> </span><span class="kw">cor</span>(x, x<span class="dv">+1</span>)
+[<span class="dv">1</span>] <span class="dv">1</span>
+&gt;<span class="st"> </span><span class="kw">cov</span>(x, -x)
+[<span class="dv">1</span>] -<span class="fl">1.144697</span>
+&gt;<span class="st"> </span><span class="kw">cor</span>(x, -x)
+[<span class="dv">1</span>] -<span class="dv">1</span>
+&gt;<span class="st"> </span><span class="kw">cor</span>(x, <span class="fl">0.5</span>*x)
+[<span class="dv">1</span>] <span class="dv">1</span>
+&gt;<span class="st"> </span>y =<span class="st"> </span><span class="kw">runif</span>(<span class="dv">10</span>, <span class="dv">1</span>, <span class="dv">5</span>)
+&gt;<span class="st"> </span>y
+ [<span class="dv">1</span>] <span class="fl">1.114662</span> <span class="fl">2.358270</span> <span class="fl">2.089179</span> <span class="fl">4.581484</span> <span class="fl">4.170922</span> <span class="fl">2.630044</span> <span class="fl">1.450336</span> <span class="fl">1.320637</span>
+ [<span class="dv">9</span>] <span class="fl">1.705649</span> <span class="fl">3.506064</span>
+&gt;<span class="st"> </span><span class="kw">cor</span>(x, y)
+[<span class="dv">1</span>] -<span class="fl">0.04560485</span>
+&gt;<span class="st"> </span><span class="kw">cor</span>(y, y)
+[<span class="dv">1</span>] <span class="dv">1</span>
+&gt;<span class="st"> </span></code></pre>
+<p>以上敘述統計所計算出來的數值，都有很直覺的意義，我們就不對這些數值進行詳細的數學說明了，有興趣的讀者請參考統計學的書籍。</p>
+<p>在下一期當中，我們將介紹一個重要的機率統計法則：「中央極限定理」，並用 R 軟體進行驗證， 這個法則是理解後續的推論統計程式，像是「信賴區間與檢定的基礎」，我們下期見！</p>
+</div>
+<div id="footer">
+<a href="https://www.facebook.com/groups/programmerMagazine/">程式人雜誌</a>，採用 <a href="http://creativecommons.org/licenses/by-sa/3.0/tw/ ">創作共用：姓名標示、相同方式分享</a> 授權，歡迎加入 <a href="https://www.facebook.com/groups/programmerMagazine/">雜誌社團</a>
+</div>
+</body>
+</html>

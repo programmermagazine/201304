@@ -1,0 +1,175 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta http-equiv="Content-Style-Type" content="text/css" />
+  <meta name="generator" content="pandoc" />
+  <title></title>
+  <style type="text/css">code{white-space: pre;}</style>
+  <style type="text/css">
+table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
+  margin: 0; padding: 0; vertical-align: baseline; border: none; }
+table.sourceCode { width: 100%; line-height: 100%; }
+td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
+td.sourceCode { padding-left: 5px; }
+code > span.kw { color: #007020; font-weight: bold; }
+code > span.dt { color: #902000; }
+code > span.dv { color: #40a070; }
+code > span.bn { color: #40a070; }
+code > span.fl { color: #40a070; }
+code > span.ch { color: #4070a0; }
+code > span.st { color: #4070a0; }
+code > span.co { color: #60a0b0; font-style: italic; }
+code > span.ot { color: #007020; }
+code > span.al { color: #ff0000; font-weight: bold; }
+code > span.fu { color: #06287e; }
+code > span.er { color: #ff0000; font-weight: bold; }
+  </style>
+  <link rel="stylesheet" href="../css/pmag.css" type="text/css" />
+</head>
+<body>
+<div id="header_wrap">
+   <h1><a href="https://www.facebook.com/groups/programmerMagazine">程式人雜誌</a> <sub> --  2013 年 4 月號 (開放公益出版品)</sub></h1>
+</div>
+<div id="content">
+<h2 id="arduino入門教學4-控制-led-燈光亮度-作者copper-maa">Arduino入門教學(4) – 控制 LED 燈光亮度 (作者：Copper Maa)</h2>
+<h3 id="arduino-筆記---lab3-控制-led-燈光亮度">Arduino 筆記 - Lab3 控制 LED 燈光亮度</h3>
+<h4 id="實驗目的">實驗目的</h4>
+<p>利用 PWM (Pulse Width Modulation, 脈衝寬度調變) 控制 LED 燈光亮度。</p>
+<h4 id="材料">材料</h4>
+<ul>
+<li>Arduino 主板 x 1</li>
+<li>LED x 1</li>
+<li>220 ohm 電阻 x 1</li>
+<li>單心線 x N</li>
+</ul>
+<h4 id="接線">接線</h4>
+<ul>
+<li>LED 接到 pin9 和 GND，長腳(陽極)串接一顆 220 ohm 電阻到 pin9，短腳(陰極)直接接到 GND</li>
+</ul>
+<div class="figure">
+<img src="../img/Arduino_LED_board1.png" />
+</div>
+<h4 id="電路圖">電路圖</h4>
+<div class="figure">
+<img src="../img/Arduino_LED_circuit1.png" />
+</div>
+<h4 id="程式碼fading.pde">程式碼：Fading.pde</h4>
+<pre class="sourceCode CPP"><code class="sourceCode cpp"><span class="dt">int</span> brightness = <span class="dv">0</span>;    <span class="co">// how bright the LED is</span>
+<span class="dt">int</span> fadeAmount = <span class="dv">5</span>;    <span class="co">// how many points to fade the LED by</span>
+
+<span class="dt">void</span> setup()  { 
+  <span class="co">// declare pin 9 to be an output:</span>
+  pinMode(<span class="dv">9</span>, OUTPUT);
+} 
+
+<span class="dt">void</span> loop()  { 
+  <span class="co">// set the brightness of pin 9:</span>
+  analogWrite(<span class="dv">9</span>, brightness);    
+
+  <span class="co">// change the brightness for next time through the loop:</span>
+  brightness = brightness + fadeAmount;
+
+  <span class="co">// reverse the direction of the fading at the ends of the fade: </span>
+  <span class="kw">if</span> (brightness == <span class="dv">0</span> || brightness == <span class="dv">255</span>) {
+    fadeAmount = -fadeAmount ; 
+  }     
+  <span class="co">// wait for 30 milliseconds to see the dimming effect    </span>
+  delay(<span class="dv">30</span>);                            
+}</code></pre>
+<p>編譯這支程式，然後上傳到 Arduino 板子上，過數秒後，就會看到 LED 燈光不斷地改變亮度，一下子漸亮，一下漸暗。</p>
+<p>說明：</p>
+<ul>
+<li>L01: brightness 變數用來保存目前的燈光亮度</li>
+<li>L02: fadeAmount 變數用來設定每一次燈光亮度的調整值</li>
+<li>L06: 宣告 pin9 為 output pin, LED 接在 pin9 上</li>
+<li>L11: 使用 analogWrite(9, brightness) 設定 pin9 上的 LED 燈光亮度</li>
+<li>L14: 調整下一次的燈光亮度</li>
+<li>L17~L19: 改變 fadeAmount 燈光亮度調整值，假如 brightness 已達到最亮(255)，就將 fadeAmount 改成 -5，讓燈光下一次的變化改成漸漸變暗，假如 brightness 已達到最暗(0)，就將 fadeAmount 改回 +5，讓燈光下一次的變化改成漸漸變亮。</li>
+<li>L21: 延遲 30ms，這樣肉眼才能看得到 LED 調光的效果</li>
+</ul>
+<h4 id="範例照片影片">範例照片／影片</h4>
+<p>Youtube 上正好有段示範利用 PWM 控制 LED 燈光亮度的影片，我們來看看他的示範：</p>
+<ul>
+<li>http://youtu.be/752tMDyvbxE</li>
+</ul>
+<h4 id="pwm-原理簡介">PWM 原理簡介</h4>
+<p>數位輸出可以控制訊號的開跟關，開意味著通電，關意味著斷電，如果我們能夠進一步通電的時間比例，就能讓類比輸出產生變化，例如 LED 燈光通電時間為 50%，就可以控制 LED 讓它只有 50% 的亮度，如果把通電時間比例改為 25%，就可以控制 LED 讓它只有 25% 的亮度。這個方法稱為 PWM (Pulse Width Modulation)脈衝寬度調變，PWM 是一個利用數位訊號來控制類比輸出的技術，常用於蜂鳴器、電熱器、馬達或風扇轉速、燈光亮度等的控制。</p>
+<p>下圖中，垂直的綠線代表一個規律的時間週期，在 Arduino 中，每個週期是 2ms (PWM 頻率為 500Hz)。analogWrite() 的參數值範圍介於 0 到 255 之間，analogWrite(255) 代表產生 100% duty cyle 的輸出(一直通電)，而 analogWrite(127) 則是產生 50% duty cycle 的輸出(一半的時間通電，一半的時間斷電)。</p>
+<p>Duty Cycle 為每一個週期通電(on) 的時間比例。</p>
+<p>數位輸出可以控制訊號的開跟關，開意味著通電，關意味著斷電，如果我們能夠進一步通電的時間比例，就能讓類比輸出產生變化，例如 LED 燈光通電時間為 50%，就可以控制 LED 讓它只有 50% 的亮度，如果把通電時間比例改為 25%，就可以控制 LED 讓它只有 25% 的亮度。這個方法稱為 PWM (Pulse Width Modulation)脈衝寬度調變，PWM 是一個利用數位訊號來控制類比輸出的技術，常用於蜂鳴器、電熱器、馬達或風扇轉速、燈光亮度等的控制。</p>
+<p>下圖中，垂直的綠線代表一個規律的時間週期，在 Arduino 中，每個週期是 2ms (PWM 頻率為 500Hz)。analogWrite() 的參數值範圍介於 0 到 255 之間，analogWrite(255) 代表產生 100% duty cyle 的輸出(一直通電)，而 analogWrite(127) 則是產生 50% duty cycle 的輸出(一半的時間通電，一半的時間斷電)。</p>
+<p>Duty Cycle 為每一個週期通電(on) 的時間比例。</p>
+<div class="figure">
+<img src="../img/Arduino_LED_wave1.png" />
+</div>
+<p>你可能會納悶，一直開開關關的 ，LED 會不會閃爍讓眼睛不舒服？答案是不會的，因為開關的頻率很快，肉眼是看不出 LED 有在閃爍的。</p>
+<h4 id="動動腦">動動腦</h4>
+<ol style="list-style-type: decimal">
+<li>如何加快或放慢 LED 亮度變化的速度？(提示：delay() 函式)</li>
+<li>改用 pin9 以外的其它 PWM 腳位</li>
+<li>多接幾顆 LED，讓每顆 LED 使用不同的速率改變亮度</li>
+</ol>
+<h4 id="參考資料">參考資料</h4>
+<ul>
+<li><a href="http://arduino.cc/en/Tutorial/PWM">http://arduino.cc/en/Tutorial/PWM</a></li>
+</ul>
+<h3 id="arduino-筆記---lab4-使用可變電阻調光">Arduino 筆記 - Lab4 使用可變電阻調光</h3>
+<h4 id="實驗目的-1">實驗目的</h4>
+<p>使用可變電阻 (potentiometer) 控制 LED 的燈光亮度，達到調光的目的。</p>
+<h4 id="材料-1">材料</h4>
+<ul>
+<li>麵包板 x 1</li>
+<li>Arduino 主板 x 1</li>
+<li>LED x 1</li>
+<li>220 ohm 電阻 x 1</li>
+<li>可變電阻 x 1</li>
+<li>單心線 x N</li>
+</ul>
+<h4 id="接線-1">接線</h4>
+<p>LED 接到 pin9 和 GND，長腳(陽極)串接一顆 220 ohm 電阻到 pin9，短腳(陰極)直接接到 GND 可變電阻中間腳位接到類比輸入(Analog Input) pin3，剩下的兩支腳位，一支接到 5V，另外一支接到 GND</p>
+<div class="figure">
+<img src="../img/Arduino_LED_board2.png" />
+</div>
+<h4 id="電路圖-1">電路圖</h4>
+<div class="figure">
+<img src="../img/Arduino_LED_circuit2.png" />
+</div>
+<h4 id="程式碼potentiometer.pde">程式碼：potentiometer.pde</h4>
+<pre class="sourceCode CPP"><code class="sourceCode cpp">
+<span class="dt">int</span> potPin = <span class="dv">3</span>; <span class="co">// select the input pin for the potentiometer</span>
+<span class="dt">int</span> ledPin = <span class="dv">9</span>; <span class="co">// select the pin for the LED</span>
+
+<span class="dt">void</span> setup() {
+  Serial.begin(<span class="dv">9600</span>);
+}
+
+<span class="dt">void</span> loop() {
+  <span class="dt">int</span> sensorValue = analogRead(potPin);
+  Serial.println(sensorValue, DEC);
+  
+  sensorValue = sensorValue/<span class="dv">4</span>; <span class="co">// convert from 0-1024 to 0-255</span>
+  analogWrite(ledPin, sensorValue);
+  delay(<span class="dv">150</span>);
+}</code></pre>
+<h4 id="說明">說明：</h4>
+<ul>
+<li>L01: 宣告可變電阻所用的類比輸入腳位</li>
+<li>L02: 宣告 LED 燈號腳位</li>
+<li>L05: 設定 SerialPort 的傳輸速率，鮑率為 9600 bps (bit per second)</li>
+<li>L09: 讀取可變電阻讀值並且放到 sensorValue 變數裏</li>
+<li>L10: 使用 Serial.println(sensorValue, DEC) 把電阻值列印到 SerialPort。DEC 代表以十進位顯示數字</li>
+<li>L12: analogRead() 讀進來的是一個 10 位元的數值，值域為 0 到 1023，由於 analogWrite() 的參數只能接受 0 到 255 的數值，所以得將 sensorValue 除以 4，讓 sensorValue 的數值從 0-1023 等比例縮小到 0-255 的範圍。</li>
+</ul>
+<h4 id="範例照片影片-1">範例照片/影片</h4>
+<p>編譯好程式，上傳到 Arduino 後，按下 Serial Monitor 這個按鈕，就會看到 COM Port 不斷收到一串範圍介於 0 到 1023 的數值，這些數值與可變電阻是相關聯的。如果旋轉可變電阻，對應的數值也會跟著改變，而且 LED 燈號的亮度也會跟著改變。</p>
+<p>Youtube 上正好有段示範利用可變電阻控制 LED 燈光亮度的影片，我們來看看他的示範：</p>
+<ul>
+<li>Arduino PWM diode dimmer -- <a href="http://youtu.be/Ivf-PfZUymo">http://youtu.be/Ivf-PfZUymo</a></li>
+</ul>
+</div>
+<div id="footer">
+<a href="https://www.facebook.com/groups/programmerMagazine/">程式人雜誌</a>，採用 <a href="http://creativecommons.org/licenses/by-sa/3.0/tw/ ">創作共用：姓名標示、相同方式分享</a> 授權，歡迎加入 <a href="https://www.facebook.com/groups/programmerMagazine/">雜誌社團</a>
+</div>
+</body>
+</html>

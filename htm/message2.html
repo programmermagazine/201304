@@ -1,0 +1,44 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta http-equiv="Content-Style-Type" content="text/css" />
+  <meta name="generator" content="pandoc" />
+  <title></title>
+  <style type="text/css">code{white-space: pre;}</style>
+  <link rel="stylesheet" href="../css/pmag.css" type="text/css" />
+</head>
+<body>
+<div id="header_wrap">
+   <h1><a href="https://www.facebook.com/groups/programmerMagazine">程式人雜誌</a> <sub> --  2013 年 4 月號 (開放公益出版品)</sub></h1>
+</div>
+<div id="content">
+<h2 id="軟體短訊-pandoc-格式轉換系統">軟體短訊-Pandoc 格式轉換系統</h2>
+<p>在 Web 盛行之後，使用簡易文字的方式撰寫網頁的需求就一直存在，於是產生了像 wiki 這樣的格式， 相對的也就需要一些工具將這些格式轉換成網頁。</p>
+<p>維基百科就是這樣一個例子，他們透過 Mediawiki 這樣的格式撰寫文章，然後維基百科的網站就會用 程式將這種簡易的格式轉換成網頁，呈現給使用者看。</p>
+<p>Wiki 類型的簡易書寫格式，除了 Mediawiki 之外，還有越來越多從 markdown 衍生出來的語法，像是 ReStructureText (RST), Textile 等等。</p>
+<p>在上一篇短訊中，我們介紹了 Markdown 這種很容易撰寫與閱讀的格式，當然我們也就需要一種程式， 可以將 markdown 文件轉換成網頁，pandoc 正是這樣的一個工具程式。</p>
+<p>Pandoc 不只可以將 Markdown 轉換成網頁，還可以轉換成 epub, latex, doc, odt 等格式的電子書， 也可以在各種簡易書寫格式之間轉換 (例如 markdown 轉 mediawiki)，因此 pandoc 也被稱為文件格式 轉換的瑞士萬用刀。</p>
+<p>Pandoc 的使用很容易，以下是一些 pandoc 的使用範例，其參數的用法與 c 語言編譯器 gcc 很像。</p>
+<pre><code>pandoc input.md -o output.html               # markdown 轉 html
+
+pandoc -s input.md -o output.tex             # markdown 轉 latex
+
+pandoc -s --webtex input.md -o output.html   # 有數學式可加上 --webtex, --mathml 或 --mathjax 等參數
+
+pandoc -s --toc -c ../css/pmag.css -B header.htm -A footer.htm input.md -o output.htm</code></pre>
+<p>Pandoc 會自動根據輸入輸出檔的附檔名進行辨認，因此不需要特別指定輸入輸出檔的格式 (當然也可以強制指定格式)。</p>
+<p>參數 -s 代表 --standalone，也就是要產生獨立可顯示的輸出檔時使用的，像是單獨的網頁 html，或者 epub 等都會 加上這個選項。</p>
+<p>Pandoc 也支援一些 markdown 的延伸語法，像是 latex 數學式可用 <code>$ ... $</code> 這樣的方式包裹住， 例如 <code>$\int_0^{\infty} f(x) dx$</code> 的呈現結果會是 <img style="vertical-align:middle" src="http://chart.apis.google.com/chart?cht=tx&amp;chl=%5Cint_0%5E%7B%5Cinfty%7D%20f%28x%29%20dx" alt="\int_0^{\infty} f(x) dx" title="\int_0^{\infty} f(x) dx" />，但是要用數學式必須加上 --webtex, --mathml 或 --mathjax 等參數，以便選擇數學式要用哪種顯示方式呈現。</p>
+<p>在上述範例中的最後一句，--toc 代表要產生目錄 (Table Of Content, TOC)，而 -c ../css/pmag.css 則是要套用 該 CSS 樣式，-B header.htm 代表要在輸出檔案前補上 header.htm 作為檔頭，而 -A footer.htm 則代表 要在輸出檔案尾端補上檔尾 footer.htm。</p>
+<p>Pandoc 的官方網站的網址如下：</p>
+<ul>
+<li><a href="http://johnmacfarlane.net/pandoc/">http://johnmacfarlane.net/pandoc/</a></li>
+</ul>
+<p>您可以從其中的 <a href="http://johnmacfarlane.net/pandoc/README.html">README</a> 取得詳細的 使用說明，或者直接參考 <a href="http://johnmacfarlane.net/pandoc/demos.html">demos</a>， 以範例的方式學習 pandoc 的用法。【本文由陳鍾誠撰寫】</p>
+</div>
+<div id="footer">
+<a href="https://www.facebook.com/groups/programmerMagazine/">程式人雜誌</a>，採用 <a href="http://creativecommons.org/licenses/by-sa/3.0/tw/ ">創作共用：姓名標示、相同方式分享</a> 授權，歡迎加入 <a href="https://www.facebook.com/groups/programmerMagazine/">雜誌社團</a>
+</div>
+</body>
+</html>
